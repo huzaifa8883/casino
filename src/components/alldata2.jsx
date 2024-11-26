@@ -462,7 +462,7 @@ Namibia Women v UAE Women</h5>
           
           </div>
           <div className=' translate-y-[-43px] mx-16'>
-            <h2 className='text-[22px] text-white font-bold font-sans '>cuiba v juventude</h2>
+            <h2 className='text-[22px] text-white font-bold font-sans '>{}</h2>
           </div>
           <div className='translate-y-[-15px] mx-3 space-x-1 text-black  font-semibold' >
             <button className='h-[30px] w-[70px] change2 rounded-lg text-center'>ALL</button>

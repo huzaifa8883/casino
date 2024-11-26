@@ -12,10 +12,12 @@ import greyhound2 from "../assets/greyhound2.svg";
 import cricket2 from "../assets/cricket2.svg";
 import dbm from "../assets/DBM.svg"
 import teen from "../assets/teen.webp"
+import {useNavigate, useParams} from "react-router-dom"
 
 import axios from "axios"
 import { Link } from 'react-router-dom';
 import Alldata from './alldata';
+import Alldata2 from './alldata2';
 
 const images = [
   'https://www.bpexch.com/img/casino/casino10.jpeg',
@@ -27,7 +29,7 @@ const images = [
   'https://www.bpexch.com/img/casino/casino1.jpeg',
   'https://www.bpexch.com/img/casino/casino4.jpeg',
   'https://www.bpexch.com/img/casino/casino2.jpeg',
-];
+]
 const races = [
   { time: '8:10 PM', location: 'Canberra(Au)' },
   { time: '8:30 PM', location: 'Melbourne(Au)' },
@@ -53,13 +55,54 @@ const Home = () => {
   const [index, setIndex] = useState(0);
   const [tennisvisible, settennisvisible] = useState(false)
   const [footballvisible, setfootballvisible] = useState(false)
-
+  
 const [slotgames, setslotgames] = useState([])
 const [showBacking2, setShowBacking2] = useState(false);
 const [showBacking, setShowBacking] = useState(false);
 const [showBacking3, setShowBacking3] = useState(false);
 const [showBacking4, setShowBacking4] = useState(false);
 const [showBacking5, setShowBacking5] = useState(false);
+const [footballdata, setfootballdata] = useState(null)
+
+const Naviagte = useNavigate()
+// 'https://sport-highlights-api.p.rapidapi.com/football/events/1022538556'
+// `https://odds-api1.p.rapidapi.com/events`
+useEffect(() => {
+  const footballapi = async()=>{
+    const response = await axios.get('https://sport-highlights-api.p.rapidapi.com/football/events',{
+      // params: {
+      //   tournamentId: '17',
+      //   media: 'true',
+    
+      // },
+    
+      // headers: {
+      //   'x-rapidapi-key': 'a35b3aee2cmshb04a1ab5eee5049p151193jsn6b79140d4e3b',
+      //   'x-rapidapi-host': 'odds-api1.p.rapidapi.com'
+      // }
+      headers: {
+        'x-rapidapi-key': '42b8d92dc0msh96f03f56cf0fdf0p12fc0ejsn8aea1251acf2',
+        'x-rapidapi-host': 'sport-highlights-api.p.rapidapi.com'
+      }
+    
+    
+    })
+    const data = response.data
+    // const filterfootball = data.filter(event => event.sport_title === 'UEFA Nations League'&&'La Liga 2 - Spain');;
+  
+
+   
+      setfootballdata(data);
+      console.log(data)
+   
+
+  }
+  
+  footballapi()
+  
+}, [])
+
+
 
 
 
@@ -154,25 +197,7 @@ const [showBacking5, setShowBacking5] = useState(false);
   setinplayvisible(false); 
   settennisvisible(false)
  }
- 
- const handleGames = async () => {
-  try {
-    const response = await axios.get('https://top-online-live-casino-malaysia-games.p.rapidapi.com/', {
-      headers: {
-         'x-rapidapi-key': 'a35b3aee2cmshb04a1ab5eee5049p151193jsn6b79140d4e3b',
-    'x-rapidapi-host': 'top-online-live-casino-malaysia-games.p.rapidapi.com'
-      }
-    });
-    
-    // Handle the response data
-    console.log(response.data);
-    setslotgames(response.data)
-  } catch (error) {
-    console.error('Error fetching games:', error);
-  }
-}
 
- handleGames()
  
 
 
@@ -282,7 +307,7 @@ const [showBacking5, setShowBacking5] = useState(false);
     minutes = minutes < 10 ? '0' + minutes : minutes;
     return `${hours}:${minutes} ${ampm}`;
   };
-
+  const events = footballdata?.events ? Object.values(footballdata.events) : [];
   return (
     <>
     <div className='c overflow-x-hidden'>
@@ -808,7 +833,7 @@ Namibia Women v UAE Women</h5>
 <div className='flex w-full h-[90px] mt-1'>
   <div className='relative text-white h-[80px] w-[80px] mx-2 flex items-center justify-center ng cursor-pointer' onClick={handleinplayvisble}>
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>7</p> 
+      <p className='text-white'>2</p> 
     </div>
     <FontAwesomeIcon icon={faClock} className='absolute top-8' size='1x' />
     <h3 className='absolute bottom-0 font-serif fo -my-1'>Inplay</h3>
@@ -816,21 +841,21 @@ Namibia Women v UAE Women</h5>
   <div className={`relative text-white h-[80px] w-[80px] flex items-center justify-center ${cricketvisible ? 'bg-black' : 'codo'}  cursor-pointer`} onClick={handlecricketvisble}>
 
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>10</p> 
+      <p className='text-white'>7</p> 
     </div>
     <img src={cricket} className='absolute top-6 h-8 w-9' />
     <h3 className='absolute bottom-0 fo -my-1 font-serif'>Cricket</h3>
   </div>
   <div className={`relative text-white h-[80px] w-[80px] mx-2  flex items-center justify-center ${tennisvisible ? 'bg-black' : 'codo'}  cursor-pointer`} onClick={handletennisvisible}>
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>7</p> 
+      <p className='text-white'>3</p> 
     </div>
     <img src={tennis} className='absolute top-6 h-8 w-9' />
     <h3 className='absolute bottom-0 font-serif fo -my-1'>Tennis</h3>
   </div>
   <div className={`relative text-white h-[80px] w-[80px]  flex items-center justify-center ${footballvisible ? 'bg-black' : 'codo'}  cursor-pointer`} onClick={handlefootballvisble}>
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>7</p> 
+      <p className='text-white'>{events.length}</p> 
     </div>
     <img src={football}className='absolute top-6 h-8 w-9'/>
     <h3 className='absolute bottom-0 font-serif fo -my-1'>Scoccer</h3>
@@ -858,38 +883,42 @@ Namibia Women v UAE Women</h5>
           <h6 className='font-xs text-black font-bold mx-24 my-1'>2</h6>
         </div>
       </div>
-     
-<div className='daga w-full h-auto flex items-center border-b-[1px] border-gray-300'>
-  <div className='yekyatha h-14 w-14 mx-1 font-xs px-2 py-1 font-serif text-[15px]'>
-    <h6>Today</h6>
-    <h6 className='mx-1'>16:00</h6>
-  </div>
-  <div className='mx-2 roboto-thin text-[15px]'>
-    <h2 className='whitespace-nowrap w-[130px]'>Vila Nova v CRB</h2>
-  </div>
-  <div className='mx-64 flex items-center '>
-    <img src={dbm} className='h-21 w-11'/>
-    <h6 className='ml-1 font-semibold w-[100px] '>553,225</h6>
-  </div>
-  <div className=' h-[60px] w-[80px] colorof -mx-52'>
-    <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>1.84</h6>
-    <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>167</h6>
-  </div>
-  <div className=' h-[60px] w-[80px] colorof2 mx-[212px] '>
-    <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>5.40</h6>
-    <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>6214</h6>
-  </div>
-  <div className='faa h-[55px] w-[90px] translate-y-[2px] -mx-28'></div>
-  <div className=' h-[60px] w-[80px] colorof mx-[124px]'>
-    <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>1.75</h6>
-    <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>210k</h6>
-  </div>
-  <div className=' h-[60px] w-[80px] colorof2 -mx-[120px]'>
-    <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>7.23</h6>
-    <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>650k</h6>
-  </div>
-  <FontAwesomeIcon icon={faCircleInfo} className='mx-[135px] h-5'  />
-</div>
+   {
+   events.map((foot, index) => (
+    <div key={index} className='daga w-full h-auto flex items-center border-b-[1px] border-gray-300'>
+      <div className='yekyatha h-14 w-14 mx-1 font-xs px-2 py-1 font-seri  text-[15px]'>
+        <h6>Today</h6>
+        <h6 className='-mx-2 whitespace-nowrap'>{formatTime(foot.startTime)}</h6>
+      </div>
+      <div className='mx-2 roboto-thin text-[14px] font-semibold'>
+        <h2 className='whitespace-nowrap w-[130px]'>{`${foot.participant1} V ${foot.participant2}`}</h2>
+      </div>
+      <div className='mx-64 flex items-center'>
+        <img src={dbm} className='h-21 w-11'/>
+        <h6 className='ml-1 font-semibold w-[100px]'>553,225</h6>
+      </div>
+      <div className='h-[60px] w-[80px] colorof -mx-52'>
+        <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>1.84</h6>
+        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>167</h6>
+      </div>
+      <div className='h-[60px] w-[80px] colorof2 mx-[212px]'>
+        <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>5.40</h6>
+        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>6214</h6>
+      </div>
+      <div className='faa h-[55px] w-[90px] translate-y-[2px] -mx-28'></div>
+      <div className='h-[60px] w-[80px] colorof mx-[124px]'>
+        <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>1.75</h6>
+        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>210k</h6>
+      </div>
+      <div className='h-[60px] w-[80px] colorof2 -mx-[120px]'>
+        <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>7.23</h6>
+        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>650k</h6>
+      </div>
+      <FontAwesomeIcon icon={faCircleInfo} className='mx-[135px] h-5' />
+    </div>
+  ))
+
+}
 
     </>
   )
@@ -1268,7 +1297,7 @@ Namibia Women v UAE Women</h5>
 
     {inplayvisible && (
       <>
-        <div className='h-10 w-full yekyatha -my-2 flex'>
+        <div className='h-10 w-full yekyatha -my-2 flex '>
           <div className='mx-2 flex'>
             <img src={cricket2} className='h-8 w-8 my-0' />
             <h4 className='text-black my-1 font-bold font-xs'>Cricket</h4>
@@ -1307,8 +1336,47 @@ Namibia Women v UAE Women</h5>
             <h6 className='font-xs text-black font-bold mx-11 my-1'>2</h6>
           </div>
         </div>
+        {/* {footballdata.map((foot)=>(
+  
+<div key={foot.eventId} className='daga w-full h-auto flex items-center border-b-[1px] border-gray-300'>
 
-        <div className='h-10 w-full yekyatha -my-2 flex'>
+<div className='yekyatha h-14 w-14 mx-1 font-xs px-2 py-1 font-serif text-[15px]  '>
+  <h6>Today</h6>
+  <h6 className='-mx-2 whitespace-nowrap '>{formatTime(foot.time)}</h6>
+</div>
+<div className='mx-2 roboto-thin text-[15px]'>
+  <Link to={`/alldata/${foot.eventId}`}>
+  <h2 className='whitespace-nowrap w-[130px] cursor-pointer' >{`${foot.participant1
+}V${foot.participant2
+}`}</h2>
+  </Link>
+</div>
+<div className='mx-64 flex items-center '>
+  <img src={dbm} className='h-21 w-11'/>
+  <h6 className='ml-1 font-semibold w-[100px] '>553,225</h6>
+</div>
+<div className=' h-[60px] w-[80px] colorof -mx-52'>
+  <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>1.84</h6>
+  <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>167</h6>
+</div>
+<div className=' h-[60px] w-[80px] colorof2 mx-[212px] '>
+  <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>5.40</h6>
+  <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>6214</h6>
+</div>
+<div className='faa h-[55px] w-[90px] translate-y-[2px] -mx-28'></div>
+<div className=' h-[60px] w-[80px] colorof mx-[124px]'>
+  <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>1.75</h6>
+  <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>210k</h6>
+</div>
+<div className=' h-[60px] w-[80px] colorof2 -mx-[120px]'>
+  <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>7.23</h6>
+  <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>650k</h6>
+</div>
+<FontAwesomeIcon icon={faCircleInfo} className='mx-[135px] h-5'  />
+</div>
+        ))} */}
+
+        <div className='h-10 w-full yekyatha -my-0 flex'>
           <div className='mx-2 flex'>
             <img src={tennis} className='h-8 w-8 my-0 mx-1' />
             <h4 className='text-black my-1 font-bold font-xs'>Tennis</h4>

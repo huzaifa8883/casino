@@ -7,6 +7,7 @@ import football from "../assets/football.svg";
 import cricket from "../assets/cricket.svg";
 import horse from "../assets/horse.svg";
 import horse2 from "../assets/horse2.svg";
+import axios from 'axios';
 import greyhound from "../assets/greyhound.svg";
 // import { Link } from 'react-router-dom';
 import greyhound2 from "../assets/greyhound2.svg";
@@ -17,7 +18,9 @@ import { useState } from 'react';
 import scoccer34 from "../assets/soceer34.svg"
 import clock from "../assets/clock.svg"
 import time from "../assets/time.png"
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+
 
 const Alldata = () => {
   const [showBacking2, setShowBacking2] = useState(false);
@@ -25,7 +28,9 @@ const [showBacking, setShowBacking] = useState(false);
 const [showBacking3, setShowBacking3] = useState(false);
 const [showBacking4, setShowBacking4] = useState(false);
 const [showBacking5, setShowBacking5] = useState(false);
-
+const [alldataoffootball, setalldataoffootball] = useState(null)
+const {id} = useParams()
+console.log("id",id)
 
 
 
@@ -68,6 +73,33 @@ const [showBacking5, setShowBacking5] = useState(false);
     setShowBacking4(false)
     setShowBacking3(false)
   };
+  useEffect(() => {
+    const footballapi = async()=>{
+      const response = await axios.get( `https://odds.p.rapidapi.com/v4/sports/upcoming/odds/${id}`,{
+        params: {
+          regions: 'us',
+          oddsFormat: 'decimal',
+          markets: 'h2h,spreads',
+          dateFormat: 'iso'
+        },
+        headers: {
+          'x-rapidapi-key': '1dfe71a0d0msh8227b831ac1d2d0p11eab9jsn29d73fad8d01',
+          'x-rapidapi-host': 'odds.p.rapidapi.com'
+        }
+      
+      
+      })
+      const data = response.data
+      // const filterfootball = data.filter(event => event.sport_title === 'UEFA Nations League'&&'La Liga 2 - Spain');;
+  
+      console.log(data)
+      setalldataoffootball(data)
+  
+    }
+    
+    footballapi()
+  
+}, [id])
   return (
     <>
     {/* <div className='c overflow-x-hidden'> */}
@@ -464,7 +496,7 @@ Namibia Women v UAE Women</h5>
           
           </div>
           <div className=' translate-y-[-43px] mx-16'>
-            <h2 className='text-[22px] text-white font-bold font-sans '>Argentina V Chile</h2>
+            <h2 className='text-[22px] text-white font-bold font-sans '>{alldataoffootball?alldataoffootball.away_team:<p>huzaifa</p>}</h2>
           </div>
           <div className='translate-y-[-15px] mx-3 space-x-1 text-black  font-semibold' >
             <button className='h-[30px] w-[70px] change2 rounded-lg text-center'>ALL</button>

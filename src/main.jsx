@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path:"/alldata",
+    path:"/alldata/:id",
     element:<Alldata/>
   },
   {
@@ -33,7 +33,7 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+
     <RouterProvider router={router} />
-  </StrictMode>
+  
 );
