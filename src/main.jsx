@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     element: <Login />,
   },
   {
-    path:"/alldata/:id",
+    path:"/alldata",
     element:<Alldata/>
   },
   {
