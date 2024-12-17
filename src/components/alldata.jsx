@@ -111,7 +111,8 @@ console.log("id",id)
   return (
     <>
     {/* <div className='c overflow-x-hidden'> */}
-      <div className='grid grid-cols-[1fr_auto] h-auto gap-4'>
+    <div className='h-full w-full overflow-x-hidden'> 
+      <div className='grid grid-cols-[1fr_auto] h-auto gap-4 '>
          <div className= {`h-full   ${toggle ? 'block' : 'hidden'} md:block z-50  w-44 gop px-4 fixed `}>
                <span className="change text-2xl font-bold flex items-center">
              <h1 className="mt-2 mx-4">BPEXCH</h1>
@@ -598,7 +599,7 @@ console.log("id",id)
 </div>
 {/* <hr className="h-1 w-full bg-gray-300 my-4" /> */}
 {/* New Component below */}
-<div className="h-[700px] cc w-full lg:w-[1170px] md:mx-44 mx-0">
+<div className="h-auto cc w-full lg:w-[1170px] md:mx-44 mx-0">
       {/* Tab Buttons */}
       <div className="flex items-center w-full space-x-4 mx-auto mb-4 justify-center">
       <div
@@ -679,7 +680,7 @@ console.log("id",id)
 
 
 
-
+    </div>
 
        
     </>
