@@ -12,11 +12,12 @@ const Signup = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
+  const [phonenumber, setphonenumber] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const handleSubmit = () => {
-    const newUser = { email, username, firstName, lastName, password };
+    const newUser = { email, username, firstName, lastName, password,phonenumber };
     dispatch(signupSuccess(newUser));
     navigate('/home'); // Navigate to home page after signup
   };
@@ -74,6 +75,16 @@ const Signup = () => {
             className="bg-transparent text-white pl-10 pr-3 py-2 w-full border-b border-white outline-none focus:border-white focus:ring-0"
           />
         </div>
+        <div className="relative">
+          <input
+            value={phonenumber}
+            onChange={(e) => setphonenumber(e.target.value)}
+            type="number"
+            placeholder="Phone Number"
+            className="bg-transparent text-white pl-10 pr-3 py-2 w-full border-b border-white outline-none focus:border-white focus:ring-0"
+          />
+        </div>
+
 
         <div className="relative">
           <input

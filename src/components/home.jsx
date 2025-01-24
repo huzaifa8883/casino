@@ -45,6 +45,9 @@ const races = [
 const Home = () => {
   const [toggledata, settoggledata] = useState(false)
   const [greyhounddata, setgreyhounddata] = useState([])
+  const [scoceerdata, setscoceerdata] = useState([])
+  const [cricketdata, setcricketdata] = useState([])
+   const [Tennisdata, setTennisdata] = useState([])
   const [horsedata, sethorsedata] = useState([])
   const [visibleImages, setVisibleImages] = useState(images.slice(0, 6));
   const [startIndex, setStartIndex] = useState(0);
@@ -53,6 +56,22 @@ const Home = () => {
   const [cricketvisible, setcricketvisible] = useState(false)
   const [inplayvisible, setinplayvisible] = useState(true)
   const [index, setIndex] = useState(0);
+  const [oddsData, setOddsData] = useState({
+    bookmakers: {
+      draftkings: { odds1: "1.50" },
+      ladbrokes: { odds2: "2.00" },
+      bet365: { odds3: "3.00" },
+      pinnacle: { odds4: "4.00" }
+    }
+  });
+  const [stats, setStats] = useState({
+    stat1: { value: 1.84, count: 167 },
+    stat2: { value: 5.40, count: 6214 },
+    stat3: { value: 1.75, count: 210000 },
+    stat4: { value: 7.23, count: 650000 },
+  });
+
+
 
 
   const [tennisvisible, settennisvisible] = useState(false)
@@ -68,6 +87,40 @@ const [showBacking5, setShowBacking5] = useState(false);
 const [footballdata, setfootballdata] = useState(null)
 const scrollContainer = useRef(null);
 const scrollContainer2 = useRef(null);
+
+
+const generateRandomOdds = () => {
+  return {
+    bookmakers: {
+      draftkings: { odds1: (Math.random() * (2.5 - 1) + 1).toFixed(2) },
+      ladbrokes: { odds2: (Math.random() * (3 - 1) + 1).toFixed(2) },
+      bet365: { odds3: (Math.random() * (3.5 - 1.2) + 1.2).toFixed(2) },
+      pinnacle: { odds4: (Math.random() * (4 - 1.5) + 1.5).toFixed(2) }
+    }
+  };
+};
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    setOddsData(generateRandomOdds());
+  }, Math.random() * (5000 - 3000) + 3000); // Random time between 3-5 seconds
+
+  return () => clearInterval(interval); // Clean up interval on component unmount
+}, []);
+useEffect(() => {
+  const intervalId = setInterval(() => {
+    // Randomizing the values for demonstration, you can replace with actual logic
+    setStats((prevStats) => ({
+      stat1: { value: (Math.random() * 10).toFixed(2), count: Math.floor(Math.random() * 1000) },
+      stat2: { value: (Math.random() * 10).toFixed(2), count: Math.floor(Math.random() * 10000) },
+      stat3: { value: (Math.random() * 10).toFixed(2), count: Math.floor(Math.random() * 100000) },
+      stat4: { value: (Math.random() * 10).toFixed(2), count: Math.floor(Math.random() * 1000000) },
+    }));
+  }, 4000); // 4 seconds
+
+  // Cleanup the interval on component unmount
+  return () => clearInterval(intervalId);
+}, []);
 
 const handleScroll = (direction) => {
   if (direction === 'left') {
@@ -320,6 +373,47 @@ const togglingbars = ()=>{
     fetchDat();
   }, []);
   
+  const formatEventTime = (dateString, timeString) => {
+    // Check if timeString is a Unix timestamp (number)
+    let time = timeString;
+    if (typeof time === 'number') {
+      // Convert Unix timestamp to Date object
+      const timestamp = new Date(time * 1000); // Convert from seconds to milliseconds
+      time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); // Format the time as HH:MM AM/PM
+    } else if (typeof time !== 'string') {
+      console.error("Invalid time format:", time);
+      return ""; // Return empty string if the time is invalid
+    }
+  
+    const eventDate = new Date(dateString);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+  
+    // Format the event date to check if it's today or tomorrow
+    const isToday = eventDate.toDateString() === today.toDateString();
+    const isTomorrow = eventDate.toDateString() === tomorrow.toDateString();
+  
+    // Split the time into hours and minutes
+    const timeParts = time.split(':');
+    const hour = parseInt(timeParts[0]);
+    const minute = timeParts[1];
+    // const suffix = hour >= 12 ? 'PM' : 'AM';
+    const formattedTime = `${(hour % 12) || 12}:${minute}`;
+  
+    // Return the formatted date and time based on the condition
+    if (isToday) {
+      return `Today ${formattedTime}`;
+    } else if (isTomorrow) {
+      return `Tomorrow ${formattedTime}`;
+    } else {
+      return `${eventDate.toLocaleDateString()} ${formattedTime}`;
+    }
+  };
+  
+  
+  
+  
   
 
   const formatTime = (dateString) => {
@@ -333,6 +427,153 @@ const togglingbars = ()=>{
     return `${hours}:${minutes} ${ampm}`;
   };
   const events = footballdata?.events ? Object.values(footballdata.events) : [];
+
+  useEffect(() => {
+    const fetchscocerdata = async () => {
+      const options = {
+        method: 'GET',
+        url: 'https://odds-api1.p.rapidapi.com/events',
+        params: {
+          tournamentId: '17',
+          media: 'false',
+        },
+        headers: {
+          'x-rapidapi-key': '68a0f6ee5emsh0ef68a20c1c00f6p1aa6f1jsn1cdab568dceb',
+          'x-rapidapi-host': 'odds-api1.p.rapidapi.com'
+        }
+      
+      };
+  
+      try {
+        const response = await axios.request(options);
+        console.log("Fetched Events:", response.data.events);
+  
+        // Convert the events object into an array
+        const eventsArray = Object.values(response.data.events);
+        
+        setscoceerdata(eventsArray); // Set the fetched data
+      } catch (err) {
+        console.error('Error fetching data:', err);
+        setscoceerdata([]); // Fallback if error occurs
+      }
+    };
+  
+    fetchscocerdata();
+  }, []);
+  
+  
+  // Debugging the scoceerdata state
+  useEffect(() => {
+    console.log("Current scoceerdata state:", scoceerdata); // Log scoceerdata state whenever it updates
+  }, [scoceerdata]);
+  
+
+  //  const fetchOddsData = async () => {
+  //   const options = {
+  //     method: "GET",
+  //     url: "https://odds-api1.p.rapidapi.com/odds",
+  //     params: {
+  //       eventId: "id1000001750850429", // Example eventId, replace with dynamic data if necessary
+  //       bookmakers: "bet365,pinnacle,draftkings,betsson,ladbrokes",
+  //       oddsFormat: "decimal",
+  //       raw: "false",
+  //     },
+  //     headers: {
+  //       "x-rapidapi-key": "1dfe71a0d0msh8227b831ac1d2d0p11eab9jsn29d73fad8d01", // Add your API key here
+  //       "x-rapidapi-host": "odds-api1.p.rapidapi.com",
+  //     },
+  //   };
+
+  //   try {
+  //     const response = await axios.request(options);
+  //     console.log(response.data); // Log the data to see the structure
+  //     setOddsData(response.data); // Save the odds data to state
+  //   } catch (error) {
+  //     console.error("Error fetching odds:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchOddsData(); // Fetch odds data when component mounts
+  // }, []);
+useEffect(() => {
+const fetchcricketdata = async()=>{
+  const options = {
+    method: 'GET',
+    url: 'https://1xbet-api.p.rapidapi.com/matches',
+     params: {
+    sport_id: '66',
+    league_id: '1119627',
+    mode: 'line',
+    lng: 'en'
+  },
+  headers: {
+    'x-rapidapi-key': '68a0f6ee5emsh0ef68a20c1c00f6p1aa6f1jsn1cdab568dceb',
+    'x-rapidapi-host': '1xbet-api.p.rapidapi.com'
+  }
+  };
+  
+  try {
+    const response = await axios.request(options);
+    console.log(response.data.data);
+    setcricketdata(response.data.data)
+  } catch (error) {
+    console.error(error);
+  }
+}
+fetchcricketdata()
+},[]);
+useEffect(() => {
+  const fetchcricketdata = async()=>{
+    const options = {
+      method: 'GET',
+      url: 'https://1xbet-api.p.rapidapi.com/matches',
+       params: {
+      sport_id: '4',
+      league_id: '294910',
+      mode: 'line',
+      lng: 'en'
+    },
+    headers: {
+      'x-rapidapi-key': '68a0f6ee5emsh0ef68a20c1c00f6p1aa6f1jsn1cdab568dceb',
+      'x-rapidapi-host': '1xbet-api.p.rapidapi.com'
+    }
+    };
+    
+    try {
+      const response = await axios.request(options);
+      console.log(response.data.data);
+      setTennisdata(response.data.data)
+    } catch (error) {
+      console.error(error);
+    }
+  }
+  fetchcricketdata()
+  },[]);
+
+function formatTimestamp(timestamp) {
+  const date = new Date(timestamp * 1000); // Convert from Unix timestamp to JS Date object
+  const now = new Date();
+  
+  // Check if it's today
+  const isToday = date.toDateString() === now.toDateString();
+  const isTomorrow = date.getDate() === now.getDate() + 1 && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+  
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const formattedTime = `${hours}:${minutes < 10 ? '0' : ''}${minutes} ${hours >= 12 ? 'PM' : 'AM'}`;
+
+  if (isToday) {
+    return `Today ${formattedTime}`;
+  }
+  if (isTomorrow) {
+    return `Tomorrow ${formattedTime}`;
+  }
+
+  return date.toDateString() + ' ' + formattedTime; // If neither today nor tomorrow, show the full date
+}
+
+
   return (
     <>
     <div className=' overflow-x-hidden'>
@@ -925,351 +1166,256 @@ Namibia Women v UAE Women</h5>
   <div className={`relative text-white h-[80px] w-[80px] flex items-center justify-center ${cricketvisible ? 'bg-black' : 'codo'}  cursor-pointer`} onClick={handlecricketvisble}>
 
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>7</p> 
+      <p className='text-white'>{cricketdata.length}</p> 
     </div>
     <img src={cricket} className='absolute top-6 h-8 w-9' />
     <h3 className='absolute bottom-0 fo -my-1 font-serif'>Cricket</h3>
   </div>
   <div className={`relative text-white h-[80px] w-[80px] mx-2  flex items-center justify-center ${tennisvisible ? 'bg-black' : 'codo'}  cursor-pointer`} onClick={handletennisvisible}>
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>3</p> 
+      <p className='text-white'>{Tennisdata.length}</p> 
     </div>
     <img src={tennis} className='absolute top-6 h-8 w-9' />
     <h3 className='absolute bottom-0 font-serif fo -my-1'>Tennis</h3>
   </div>
   <div className={`relative text-white h-[80px] w-[80px]  flex items-center justify-center ${footballvisible ? 'bg-black' : 'codo'}  cursor-pointer`} onClick={handlefootballvisble}>
     <div className='mb-14 ml-14 font-serif'>
-      <p className='text-white'>{events.length}</p> 
+      <p className='text-white'>{scoceerdata.length}</p> 
     </div>
     <img src={football}className='absolute top-6 h-8 w-9'/>
     <h3 className='absolute bottom-0 font-serif fo -my-1'>Scoccer</h3>
   </div>
 </div>
 
+
 {
-  footballvisible&&(
-    <>
-      <div className='h-10 yekyatha w-full flex items-center px-2'>
-  {/* Left Section (Cricket Image and Name) */}
-  <div className='flex items-center'>
-    <img src={cricket2} className='h-8 w-8' />
-    <h4 className='text-black font-bold text-xs sm:text-sm ml-2'>Football</h4>
-  </div>
+ footballvisible && (
+  <>
+    <div className="h-10 yekyatha w-full flex items-center px-2">
+      {/* Left Section (Football Image and Name) */}
+      <div className="flex items-center">
+        <img src={cricket2} className="h-8 w-8" />
+        <h4 className="text-black font-bold text-xs sm:text-sm ml-2">Football</h4>
+      </div>
 
-  {/* Middle Section (Matched Heading) */}
-  <div className='flex-grow flex justify-center'>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>Matched</h6>
-  </div>
+      {/* Middle Section (Matched Heading) */}
+      <div className="flex-grow flex justify-center">
+        <h6 className="text-black font-bold text-xs sm:text-sm">Matched</h6>
+      </div>
 
-  {/* Right Section (1, x, 2) */}
-  <div className='flex space-x-2 sm:space-x-4'>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>1</h6>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>X</h6>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>2</h6>
-  </div>
-</div>
-
-
-   {
-   events.map((foot, index) => (
-    <div key={index} className='daga w-full h-auto flex items-center border-b-[1px] border-gray-300'>
-      <div className='yekyatha h-14 w-14 mx-1 font-xs px-2 py-1 font-seri  text-[15px]'>
-        <h6>Today</h6>
-        <h6 className='-mx-2 whitespace-nowrap'>{formatTime(foot.startTime)}</h6>
+      {/* Right Section (1, x, 2) */}
+      <div className="flex space-x-2 sm:space-x-4">
+        <h6 className="text-black font-bold text-xs sm:text-sm">1</h6>
+        <h6 className="text-black font-bold text-xs sm:text-sm">X</h6>
+        <h6 className="text-black font-bold text-xs sm:text-sm">2</h6>
       </div>
-      <div className='mx-2 roboto-thin text-[14px] font-semibold'>
-        <h2 className='whitespace-nowrap w-[130px]'>{`${foot.participant1} V ${foot.participant2}`}</h2>
-      </div>
-      <div className='mx-64 flex items-center'>
-        <img src={dbm} className='h-21 w-11'/>
-        <h6 className='ml-1 font-semibold w-[100px]'>553,225</h6>
-      </div>
-      <div className='h-[60px] w-[80px] colorof -mx-52'>
-        <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>1.84</h6>
-        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>167</h6>
-      </div>
-      <div className='h-[60px] w-[80px] colorof2 mx-[212px]'>
-        <h6 className='font-bold text-[19px] px-6 py-1 font-sans'>5.40</h6>
-        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>6214</h6>
-      </div>
-      <div className='faa h-[55px] w-[90px] translate-y-[2px] -mx-28'></div>
-      <div className='h-[60px] w-[80px] colorof mx-[124px]'>
-        <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>1.75</h6>
-        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>210k</h6>
-      </div>
-      <div className='h-[60px] w-[80px] colorof2 -mx-[120px]'>
-        <h6 className='font-bold text-[19px] px-5 py-1 font-sans'>7.23</h6>
-        <h6 className='px-6 translate-y-[-3px] text-[15px] font-semibold'>650k</h6>
-      </div>
-      <FontAwesomeIcon icon={faCircleInfo} className='mx-[135px] h-5' />
     </div>
-  ))
+
+    {scoceerdata.map((foot, index) => (
+      <div key={index} className="daga w-full h-auto flex flex-wrap items-center border-b-[1px] border-gray-300">
+        <div className="yekyatha h-14 w-full sm:w-16 mx-1 text-sm sm:text-sm px-4 py-1 font-serif">
+          <h6>{formatEventTime(foot.date, foot.startTime)}</h6>
+        </div>
+        
+        {/* Match info */}
+        <div className="mx-2 roboto-thin text-[14px] font-semibold w-full sm:w-[130px] md:w-[130px]">
+          <h2 className="whitespace-nowrap">{foot.participant1} V {foot.participant2}</h2>
+        </div>
+
+        {/* Image and Score */}
+        <div className="mx-2 sm:mx-44 flex items-center w-full sm:w-auto justify-between sm:justify-start">
+          <img src={dbm} className="h-16 w-8 sm:h-21 sm:w-11" />
+          <h6 className="ml-1  font-semibold w-[100px] sm:w-[120px]">553,225</h6>
+        </div>
+
+        {/* First Stats Block */}
+        <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat1.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat1.count}</h6>
+      </div>
+
+      {/* Second Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat2.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat2.count}</h6>
+      </div>
+
+      {/* Third Stats Block */}
+      <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat3.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat3.count}</h6>
+      </div>
+
+      {/* Fourth Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat4.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat4.count}</h6>
+      </div>
+
+        {/* Info Icon */}
+        <div className="sm:mx-4">
+          <FontAwesomeIcon icon={faCircleInfo} className="h-5" />
+        </div>
+      </div>
+    ))}
+  </>
+)
 
 }
 
-    </>
-  )
-}
+
+
+
+
 {tennisvisible&&(
   <>
   
-  <div className='h-10 yekyatha w-full flex items-center px-2'>
-  {/* Left Section (Cricket Image and Name) */}
-  <div className='flex items-center'>
-    <img src={cricket2} className='h-8 w-8' />
-    <h4 className='text-black font-bold text-xs sm:text-sm ml-2'>Tennis</h4>
-  </div>
+  <div className="h-10 yekyatha w-full flex items-center px-2">
+      {/* Left Section (Football Image and Name) */}
+      <div className="flex items-center">
+        <img src={cricket2} className="h-8 w-8" />
+        <h4 className="text-black font-bold text-xs sm:text-sm ml-2">Tennis</h4>
+      </div>
 
-  {/* Middle Section (Matched Heading) */}
-  <div className='flex-grow flex justify-center'>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>Matched</h6>
-  </div>
+      {/* Middle Section (Matched Heading) */}
+      <div className="flex-grow flex justify-center">
+        <h6 className="text-black font-bold text-xs sm:text-sm">Matched</h6>
+      </div>
 
-  {/* Right Section (1, x, 2) */}
-  <div className='flex space-x-2 sm:space-x-4'>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>1</h6>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>X</h6>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>2</h6>
-  </div>
-</div>
+      {/* Right Section (1, x, 2) */}
+      <div className="flex space-x-2 sm:space-x-4">
+        <h6 className="text-black font-bold text-xs sm:text-sm">1</h6>
+        <h6 className="text-black font-bold text-xs sm:text-sm">X</h6>
+        <h6 className="text-black font-bold text-xs sm:text-sm">2</h6>
+      </div>
+    </div>
 
-     
+    {Tennisdata.map((match, index) => (
+      <div key={index} className="daga w-full h-auto flex flex-wrap items-center border-b-[1px] border-gray-300">
+        <div className="yekyatha h-14 w-full sm:w-16 mx-1 text-sm sm:text-sm px-4 py-1 font-serif">
+        <h6>{formatTimestamp(match.start_timestamp)}</h6>
+        </div>
+        
+        {/* Match info */}
+        <div className="mx-2 roboto-thin text-[14px] font-semibold w-full sm:w-[100px] md:w-[130px]">
+          <h2 className="whitespace-nowrap">{match.home_team} v {match.away_team}</h2>
+        </div>
 
-      <div className="daga w-full h-auto flex flex-wrap items-center justify-between border-b border-gray-300 p-2">
-  {/* Date and Time */}
-  <div className="yekyatha h-14 w-14 mx-1 text-xs px-2 py-1 font-serif text-[14px] sm:text-[15px]">
-    <h6>Today</h6>
-    <h6 className="mx-1">10:30</h6>
-  </div>
+        {/* Image and Score */}
+        <div className="mx-2 sm:mx-52 flex items-center w-full sm:w-auto justify-between sm:justify-start">
+          <img src={dbm} className="h-16 w-8 sm:h-21 sm:w-11" />
+          <h6 className="ml-1  font-semibold w-[100px] sm:w-[120px]">553,225</h6>
+        </div>
 
-  {/* Title */}
-  <div className="mx-2 roboto-thin text-[14px] sm:text-[15px] flex-1 min-w-[130px] truncate">
-    <h2>Ja Draper v De Minaur</h2>
-  </div>
+        {/* First Stats Block */}
+        <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat1.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat1.count}</h6>
+      </div>
 
-  {/* Image and Value */}
-  <div className="flex items-center mx-2 sm:mx-4">
-    <img src={dbm} className="h-14 w-10 sm:h-16 sm:w-12 object-contain" />
-    <h6 className="ml-1 font-semibold text-[14px] sm:text-[15px]">6,587,239</h6>
-  </div>
+      {/* Second Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat2.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat2.count}</h6>
+      </div>
 
-  {/* Stats 1 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.88</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">3668</h6>
-  </div>
+      {/* Third Stats Block */}
+      <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat3.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat3.count}</h6>
+      </div>
 
-  {/* Stats 2 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">2.40</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">4214</h6>
-  </div>
+      {/* Fourth Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat4.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat4.count}</h6>
+      </div>
 
-  {/* Empty Box */}
-  <div className="faa h-14 w-[50px] sm:w-[90px] hidden sm:block"></div>
-
-  {/* Stats 3 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.75</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">410k</h6>
-  </div>
-
-  {/* Stats 4 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2  text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">7.23</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">650k</h6>
-  </div>
-
-  {/* Info Icon */}
-  <div className="mx-2 sm:mx-4">
-    <FontAwesomeIcon icon={faCircleInfo} className="h-4 sm:h-5" />
-  </div>
-</div>
-
-<div className="daga w-full h-auto flex flex-wrap items-center justify-between border-b border-gray-300 p-2">
-  {/* Date and Time */}
-  <div className="yekyatha h-14 w-14 mx-1 text-xs px-2 py-1 font-serif text-[14px] sm:text-[15px]">
-    <h6>Today</h6>
-    <h6 className="mx-1">12:00</h6>
-  </div>
-
-  {/* Match Title */}
-  <div className="mx-2 roboto-thin text-[14px] sm:text-[15px] flex-1 min-w-[130px] truncate">
-    <h2>Iga Swiatek v J Pegula</h2>
-  </div>
-
-  {/* Image and Value */}
-  <div className="flex items-center mx-2 sm:mx-4">
-    <img src={dbm} className="h-12 w-10 sm:h-14 sm:w-12 object-contain" />
-    <h6 className="ml-1 font-semibold text-[14px] sm:text-[15px] w-auto sm:w-[100px]">5,432,123</h6>
-  </div>
-
-  {/* Stats 1 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">2.05</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">2890</h6>
-  </div>
-
-  {/* Stats 2 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.75</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">3456</h6>
-  </div>
-
-  {/* Empty Box */}
-  <div className="faa h-14 w-[50px] sm:w-[90px] hidden sm:block"></div>
-
-  {/* Stats 3 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.65</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">500k</h6>
-  </div>
-
-  {/* Stats 4 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">5.00</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">600k</h6>
-  </div>
-
-  {/* Info Icon */}
-  <div className="mx-2 sm:mx-4">
-    <FontAwesomeIcon icon={faCircleInfo} className="h-4 sm:h-5" />
-  </div>
-</div>
+        {/* Info Icon */}
+        <div className="sm:mx-4">
+          <FontAwesomeIcon icon={faCircleInfo} className="h-5" />
+        </div>
+      </div>
+    ))}
   
   </>
 )}
 
 {cricketvisible && (
   <>
-             <div className='h-10 yekyatha w-full flex items-center px-2'>
-  {/* Left Section (Cricket Image and Name) */}
-  <div className='flex items-center'>
-    <img src={cricket2} className='h-8 w-8' />
-    <h4 className='text-black font-bold text-xs sm:text-sm ml-2'>Cricket</h4>
-  </div>
+    {/* Cricket Match Data */}
+    <div className="h-10 yekyatha w-full flex items-center px-2">
+      {/* Left Section (Football Image and Name) */}
+      <div className="flex items-center">
+        <img src={cricket2} className="h-8 w-8" />
+        <h4 className="text-black font-bold text-xs sm:text-sm ml-2">Cricket</h4>
+      </div>
 
-  {/* Middle Section (Matched Heading) */}
-  <div className='flex-grow flex justify-center'>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>Matched</h6>
-  </div>
+      {/* Middle Section (Matched Heading) */}
+      <div className="flex-grow flex justify-center">
+        <h6 className="text-black font-bold text-xs sm:text-sm">Matched</h6>
+      </div>
 
-  {/* Right Section (1, x, 2) */}
-  <div className='flex space-x-2 sm:space-x-4'>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>1</h6>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>X</h6>
-    <h6 className='text-black font-bold text-xs sm:text-sm'>2</h6>
-  </div>
-</div>
+      {/* Right Section (1, x, 2) */}
+      <div className="flex space-x-2 sm:space-x-4">
+        <h6 className="text-black font-bold text-xs sm:text-sm">1</h6>
+        <h6 className="text-black font-bold text-xs sm:text-sm">X</h6>
+        <h6 className="text-black font-bold text-xs sm:text-sm">2</h6>
+      </div>
+    </div>
 
-      <div className="daga w-full h-auto flex flex-wrap items-center justify-between border-b border-gray-300 p-2">
-  {/* Date and Time */}
-  <div className="yekyatha h-14 w-14 mx-1 text-xs px-2 py-1 font-serif text-[14px] sm:text-[15px]">
-    <h6>Today</h6>
-    <h6 className="mx-1">10:30</h6>
-  </div>
+    {cricketdata.map((match, index) => (
+      <div key={index} className="daga w-full h-auto flex flex-wrap items-center border-b-[1px] border-gray-300">
+        <div className="yekyatha h-14 w-full sm:w-16 mx-1 text-sm sm:text-sm px-4 py-1 font-serif">
+        <h6>{formatTimestamp(match.start_timestamp)}</h6>
+        </div>
+        
+        {/* Match info */}
+        <div className="mx-2 roboto-thin text-[14px] font-semibold w-full sm:w-[100px] md:w-[130px]">
+          <h2 className="whitespace-nowrap">{match.home_team} v {match.away_team}</h2>
+        </div>
 
-  {/* Title */}
-  <div className="mx-2 roboto-thin text-[14px] sm:text-[15px] flex-1 min-w-[130px] truncate">
-    <h2>Ja Draper v De Minaur</h2>
-  </div>
+        {/* Image and Score */}
+        <div className="mx-2 sm:mx-52 flex items-center w-full sm:w-auto justify-between sm:justify-start">
+          <img src={dbm} className="h-16 w-8 sm:h-21 sm:w-11" />
+          <h6 className="ml-1  font-semibold w-[100px] sm:w-[120px]">553,225</h6>
+        </div>
 
-  {/* Image and Value */}
-  <div className="flex items-center mx-2 sm:mx-4">
-    <img src={dbm} className="h-14 w-10 sm:h-16 sm:w-12 object-contain" />
-    <h6 className="ml-1 font-semibold text-[14px] sm:text-[15px]">6,587,239</h6>
-  </div>
+        {/* First Stats Block */}
+        <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat1.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat1.count}</h6>
+      </div>
 
-  {/* Stats 1 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.88</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">3668</h6>
-  </div>
+      {/* Second Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat2.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat2.count}</h6>
+      </div>
 
-  {/* Stats 2 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">2.40</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">4214</h6>
-  </div>
+      {/* Third Stats Block */}
+      <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat3.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat3.count}</h6>
+      </div>
 
-  {/* Empty Box */}
-  <div className="faa h-14 w-[50px] sm:w-[90px] hidden sm:block"></div>
+      {/* Fourth Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat4.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat4.count}</h6>
+      </div>
 
-  {/* Stats 3 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.75</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">410k</h6>
-  </div>
-
-  {/* Stats 4 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2  text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">7.23</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">650k</h6>
-  </div>
-
-  {/* Info Icon */}
-  <div className="mx-2 sm:mx-4">
-    <FontAwesomeIcon icon={faCircleInfo} className="h-4 sm:h-5" />
-  </div>
-</div>
-
-<div className="daga w-full h-auto flex flex-wrap items-center justify-between border-b border-gray-300 p-2">
-  {/* Date and Time */}
-  <div className="yekyatha h-14 w-14 mx-1 text-xs px-2 py-1 font-serif text-[14px] sm:text-[15px]">
-    <h6>Today</h6>
-    <h6 className="mx-1">12:00</h6>
-  </div>
-
-  {/* Match Title */}
-  <div className="mx-2 roboto-thin text-[14px] sm:text-[15px] flex-1 min-w-[130px] truncate">
-    <h2>Iga Swiatek v J Pegula</h2>
-  </div>
-
-  {/* Image and Value */}
-  <div className="flex items-center mx-2 sm:mx-4">
-    <img src={dbm} className="h-12 w-10 sm:h-14 sm:w-12 object-contain" />
-    <h6 className="ml-1 font-semibold text-[14px] sm:text-[15px] w-auto sm:w-[100px]">5,432,123</h6>
-  </div>
-
-  {/* Stats 1 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">2.05</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">2890</h6>
-  </div>
-
-  {/* Stats 2 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.75</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">3456</h6>
-  </div>
-
-  {/* Empty Box */}
-  <div className="faa h-14 w-[50px] sm:w-[90px] hidden sm:block"></div>
-
-  {/* Stats 3 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.65</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">500k</h6>
-  </div>
-
-  {/* Stats 4 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">5.00</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">600k</h6>
-  </div>
-
-  {/* Info Icon */}
-  <div className="mx-2 sm:mx-4">
-    <FontAwesomeIcon icon={faCircleInfo} className="h-4 sm:h-5" />
-  </div>
-</div>
-
-
-
- 
-
-</>
+        {/* Info Icon */}
+        <div className="sm:mx-4">
+          <FontAwesomeIcon icon={faCircleInfo} className="h-5" />
+        </div>
+      </div>
+    ))}
+  </>
 )}
+
+
+
   <>
 
     {inplayvisible && (
@@ -1377,107 +1523,53 @@ Namibia Women v UAE Women</h5>
   </div>
 </div>
 
-<div className="daga w-full h-auto flex flex-wrap items-center justify-between border-b border-gray-300 p-2">
-  {/* Date and Time */}
-  <div className="yekyatha h-14 w-14 mx-1 text-xs px-2 py-1 font-serif text-[14px] sm:text-[15px]">
-    <h6>Today</h6>
-    <h6 className="mx-1">10:30</h6>
-  </div>
+{cricketdata.map((match, index) => (
+      <div key={index} className="daga w-full h-auto flex flex-wrap items-center border-b-[1px] border-gray-300">
+        <div className="yekyatha h-14 w-full sm:w-16 mx-1 text-sm sm:text-sm px-4 py-1 font-serif">
+        <h6>{formatTimestamp(match.start_timestamp)}</h6>
+        </div>
+        
+        {/* Match info */}
+        <div className="mx-2 roboto-thin text-[14px] font-semibold w-full sm:w-[100px] md:w-[130px]">
+          <h2 className="whitespace-nowrap">{match.home_team} v {match.away_team}</h2>
+        </div>
 
-  {/* Title */}
-  <div className="mx-2 roboto-thin text-[14px] sm:text-[15px] flex-1 min-w-[130px] truncate">
-    <h2>Ja Draper v De Minaur</h2>
-  </div>
+        {/* Image and Score */}
+        <div className="mx-2 sm:mx-52 flex items-center w-full sm:w-auto justify-between sm:justify-start">
+          <img src={dbm} className="h-16 w-8 sm:h-21 sm:w-11" />
+          <h6 className="ml-1  font-semibold w-[100px] sm:w-[120px]">553,225</h6>
+        </div>
 
-  {/* Image and Value */}
-  <div className="flex items-center mx-2 sm:mx-4">
-    <img src={dbm} className="h-14 w-10 sm:h-16 sm:w-12 object-contain" />
-    <h6 className="ml-1 font-semibold text-[14px] sm:text-[15px]">6,587,239</h6>
-  </div>
+        {/* First Stats Block */}
+        <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat1.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat1.count}</h6>
+      </div>
 
-  {/* Stats 1 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.88</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">3668</h6>
-  </div>
+      {/* Second Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-6 py-1 font-sans">{stats.stat2.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat2.count}</h6>
+      </div>
 
-  {/* Stats 2 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">2.40</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">4214</h6>
-  </div>
+      {/* Third Stats Block */}
+      <div className="h-[60px] w-[80px] colorof sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat3.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat3.count}</h6>
+      </div>
 
-  {/* Empty Box */}
-  <div className="faa h-14 w-[50px] sm:w-[90px] hidden sm:block"></div>
+      {/* Fourth Stats Block */}
+      <div className="h-[60px] w-[80px] colorof2 sm:mx-4 flex flex-col justify-center items-center">
+        <h6 className="font-bold text-[19px] px-5 py-1 font-sans">{stats.stat4.value}</h6>
+        <h6 className="px-6 translate-y-[-3px] text-[15px] font-semibold">{stats.stat4.count}</h6>
+      </div>
 
-  {/* Stats 3 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.75</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">410k</h6>
-  </div>
-
-  {/* Stats 4 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2  text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">7.23</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">650k</h6>
-  </div>
-
-  {/* Info Icon */}
-  <div className="mx-2 sm:mx-4">
-    <FontAwesomeIcon icon={faCircleInfo} className="h-4 sm:h-5" />
-  </div>
-</div>
-
-<div className="daga w-full h-auto flex flex-wrap items-center justify-between border-b border-gray-300 p-2">
-  {/* Date and Time */}
-  <div className="yekyatha h-14 w-14 mx-1 text-xs px-2 py-1 font-serif text-[14px] sm:text-[15px]">
-    <h6>Today</h6>
-    <h6 className="mx-1">12:00</h6>
-  </div>
-
-  {/* Match Title */}
-  <div className="mx-2 roboto-thin text-[14px] sm:text-[15px] flex-1 min-w-[130px] truncate">
-    <h2>Iga Swiatek v J Pegula</h2>
-  </div>
-
-  {/* Image and Value */}
-  <div className="flex items-center mx-2 sm:mx-4">
-    <img src={dbm} className="h-12 w-10 sm:h-14 sm:w-12 object-contain" />
-    <h6 className="ml-1 font-semibold text-[14px] sm:text-[15px] w-auto sm:w-[100px]">5,432,123</h6>
-  </div>
-
-  {/* Stats 1 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">2.05</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">2890</h6>
-  </div>
-
-  {/* Stats 2 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.75</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">3456</h6>
-  </div>
-
-  {/* Empty Box */}
-  <div className="faa h-14 w-[50px] sm:w-[90px] hidden sm:block"></div>
-
-  {/* Stats 3 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">1.65</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">500k</h6>
-  </div>
-
-  {/* Stats 4 */}
-  <div className="h-auto w-[50px] sm:w-[80px] colorof2 text-center mx-1 sm:mx-4">
-    <h6 className="font-bold text-[17px] sm:text-[19px] font-sans">5.00</h6>
-    <h6 className="text-[13px] sm:text-[15px] font-semibold">600k</h6>
-  </div>
-
-  {/* Info Icon */}
-  <div className="mx-2 sm:mx-4">
-    <FontAwesomeIcon icon={faCircleInfo} className="h-4 sm:h-5" />
-  </div>
-</div>
+        {/* Info Icon */}
+        <div className="sm:mx-4">
+          <FontAwesomeIcon icon={faCircleInfo} className="h-5" />
+        </div>
+      </div>
+    ))}
 
 
 
